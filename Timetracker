@@ -1,0 +1,399 @@
+'Module1
+Sub Login()
+
+  
+  If DateDiff("m", CDate(ActiveSheet.Name), Now) <> 0 Then
+        MsgBox "You are in a wrong sheet..Login at the correct month !", vbCritical, "Hey Buddy"
+        Exit Sub
+  End If
+
+
+  Dim usedRows
+  Dim firstEntry
+  
+  firstEntry = False
+  usedRows = ActiveSheet.UsedRange.Rows.Count
+  'MsgBox (usedRows)
+
+  If ActiveSheet.Cells(usedRows, 1).Value = "Date" Then
+     usedRows = usedRows + 1
+     firstEntry = True
+  End If
+  
+    
+  If DateDiff("d", ActiveSheet.Cells(usedRows, 1).Value, Now) = 0 Then
+        MsgBox "You have already logged in for Today !", vbCritical, "Hey Buddy"
+  ElseIf DateDiff("d", Cells(usedRows, 1).Value, Now) > 0 Then
+        If (firstEntry) Then
+          ActiveSheet.Cells(usedRows, 1).Value = Now
+          ActiveSheet.Cells(usedRows, 2).Value = Now
+        Else
+          ActiveSheet.Cells(usedRows + 1, 1).Value = Now
+          ActiveSheet.Cells(usedRows + 1, 2).Value = Now
+        End If
+        
+  End If
+  
+End Sub
+
+Sub Logout()
+
+  If DateDiff("m", CDate(ActiveSheet.Name), Now) <> 0 Then
+        MsgBox "You are in a wrong sheet..Logout at the correct month !", vbCritical, "Hey Buddy"
+        Exit Sub
+  End If
+  
+  
+  Dim usedRows, actualTime, actualHours, actualMins, totalMins
+  usedRows = ActiveSheet.UsedRange.Rows.Count
+  'MsgBox (usedRows)
+  If ActiveSheet.Cells(usedRows, 1).Value = "Date" Then
+     usedRows = usedRows + 1
+  End If
+  
+  
+  
+  If DateDiff("d", ActiveSheet.Cells(usedRows, 1).Value, Now) = 0 Then
+        ActiveSheet.Cells(usedRows, 3).Value = Now
+        'ActiveSheet.Cells(usedRows, 4).Value = (ActiveSheet.Cells(usedRows, 3).Value - ActiveSheet.Cells(usedRows, 2).Value)
+        totalMins = DateDiff("n", ActiveSheet.Cells(usedRows, 2).Value, ActiveSheet.Cells(usedRows, 3).Value) ' - (avgHours * 60)
+        actualHours = Int(totalMins / 60)
+        actualMins = totalMins - (actualHours * 60)
+        If Len(actualMins) = 1 Then
+          actualMins = "0" & actualMins
+        End If
+        actualTime = actualHours & "." & actualMins
+        ActiveSheet.Cells(usedRows, 4).Value = actualTime
+  
+  ElseIf DateDiff("d", ActiveSheet.Cells(usedRows, 1).Value, Now) > 0 Then
+        MsgBox "You have not logged in for Today !", vbCritical, "Hey Buddy"
+        
+  End If
+  
+End Sub
+
+Sub About()
+  HelpForm.Show
+End Sub
+
+Sub Average()
+  On Error GoTo errhandler
+   'Dim usedRows, arr1, workedDays
+    'usedRows = ActiveSheet.UsedRange.Rows.Count
+    'workedDays = usedRows - 3
+    'Range("F3").Select
+    'ActiveCell.Formula = "=AVERAGE(D4:D" & usedRows & ")"
+    'arr1 = Split(CDate(Range("F3").Value), ":")
+   'MsgBox "Your average time(hh:mm) for " & workedDays & " day(s) is " & arr1(0) & ":" & arr1(1), vbInformation, "Hey Buddy"
+    'Range("F3").Select
+    'Selection.ClearContents
+    'Range("E3").Select
+    
+    
+   'New code for average
+    Dim usedRows, tempArray, totalMinsforDay, totalMinsforMonth, averageTime, i, avgCounter
+    averageTime = 0
+    avgCounter = 0
+    totalMinsforMonth = 0
+    
+    usedRows = ActiveSheet.UsedRange.Rows.Count
+     If usedRows < 4 And Cells(4, 4).Value = "" Then
+      MsgBox "Sorry No data exists", vbCritical, "Oops!!"
+      Exit Sub
+     End If
+     For i = 4 To usedRows
+     If Trim(Cells(i, 4).Value) <> "" Then
+        tempArray = Split(CStr(Cells(i, 4).Value), ".")
+        totalMinsforDay = tempArray(0) * 60 + tempArray(1)
+        totalMinsforMonth = totalMinsforMonth + totalMinsforDay
+        avgCounter = avgCounter + 1
+     End If
+     Next
+     
+    averageTime = Round(totalMinsforMonth / avgCounter, 0)
+    
+    
+     Dim actualAvgHours, actualAvgMins, actualAvgTime
+     actualAvgHours = Int(averageTime / 60)
+     actualAvgMins = averageTime - (actualAvgHours * 60)
+       If Len(actualAvgMins) = 1 Then
+         actualAvgMins = "0" & actualAvgMins
+       End If
+      actualAvgTime = actualAvgHours & "." & actualAvgMins
+     
+    MsgBox "Your average time(hh.mm) for " & avgCounter & " day(s) is " & actualAvgTime, vbInformation, "Hey Buddy"
+    Exit Sub
+
+errhandler:
+    MsgBox "An error occurred due to backward compatibility.Please format the 'hours spent' column to text(hh.mm). " & Chr(13) & "Error description-" & Err.Description, vbCritical, "Oops!!"
+    
+End Sub
+
+
+'Module2
+
+Sub CreateNextMonth()
+'
+' CreateNextMonth Macro
+'
+'
+   If ActiveSheet.Index < Sheets.Count Then
+      MsgBox "Next Month sheet already exists", vbCritical, "ERROR"
+      Exit Sub
+   End If
+    Dim tempSheetName, tempSheetCount, arrDate(13), newSheetName
+        tempSheetName = ActiveSheet.Name
+        tempSheetCount = Sheets.Count
+    arrDate(0) = "none"
+    arrDate(1) = "Jan"
+    arrDate(2) = "Feb"
+    arrDate(3) = "Mar"
+    arrDate(4) = "Apr"
+    arrDate(5) = "May"
+    arrDate(6) = "Jun"
+    arrDate(7) = "Jul"
+    arrDate(8) = "Aug"
+    arrDate(9) = "Sep"
+    arrDate(10) = "Oct"
+    arrDate(11) = "Nov"
+    arrDate(12) = "Dec"
+    
+    MsgBox "Click Yes in the next message box(if any) to create a new sheet for the month", vbInformation, "Hi User"
+    
+    ActiveSheet.Select
+    
+    ActiveSheet.Copy After:=Sheets(tempSheetCount)
+    
+    newSheetName = arrDate(Month(DateAdd("m", 1, tempSheetName))) & " " & Year(DateAdd("m", 1, tempSheetName))
+    
+    Sheets(ActiveSheet.Name).Name = newSheetName
+    Rows("4:50").Select
+    Selection.Delete Shift:=xlUp
+    Range("A4").Select
+End Sub
+
+'Module3
+
+Sub DropDown1_Change()
+On Error GoTo errhandler
+ Dim myDD As DropDown, selectedMonth, rowCount, sourceRange, strXValues
+   Set myDD = Sheets("Graph").DropDowns("Drop Down 1")
+   
+   If myDD.ListIndex > 1 Then
+    'MsgBox "This might take a few seconds", vbInformation
+    
+   
+   selectedMonth = Sheets(myDD.ListIndex + 2).Name ' increment this whenever adding new sheets before the month
+     If DateDiff("m", Now, CDate(selectedMonth)) > 0 Then
+       MsgBox "Sorry..You can't view the graph for a future month", vbCritical, "Oops!!"
+       myDD.ListIndex = 1
+       Exit Sub
+     End If
+     
+     
+     If Sheets(selectedMonth).UsedRange.Rows.Count < 5 Then
+       MsgBox "Sorry..Insufficient data to generate graph for the selected month. Please try again after sometime", vbCritical, "Oops!!"
+       myDD.ListIndex = 1
+       Exit Sub
+     End If
+     
+     MsgBox "Please wait while the system generates the graph.The tool may vanish for a few secs... ", , "Time Tracker"
+     
+     
+     Application.Visible = False
+     Sheets("GraphData").Visible = True
+     Sheets("GraphData").Select
+     createDataForGraph (selectedMonth) ' sub call
+     Sheets("Graph").Select
+  
+    rowCount = Sheets(selectedMonth).UsedRange.Rows.Count - 2
+    sourceRange = "C1:C" & rowCount
+    strXValues = "=GraphData!$A$2:$A$" & rowCount
+    
+    'Sheets("Graph").Activate
+    'ActiveSheet.ChartObjects("Chart 2").Activate
+    'ActiveChart.SeriesCollection(1).Select
+    'ActiveChart.SetSourceData Source:=Sheets("GraphData").Range(sourceRange)
+    'ActiveChart.SeriesCollection(1).XValues = strXValues
+    
+    ActiveSheet.ChartObjects("Chart 1").Visible = True
+    ActiveSheet.ChartObjects("Chart 1").Activate
+    ActiveChart.SeriesCollection(1).Select
+    ActiveChart.SetSourceData Source:=Sheets("GraphData").Range(sourceRange)
+    ActiveChart.SeriesCollection(1).XValues = strXValues
+    ActiveSheet.Cells(1, 1).Select
+    Sheets("GraphData").Visible = False
+    
+       
+   Application.Visible = True
+   
+    display_average (selectedMonth)
+   
+  End If
+  Exit Sub
+  
+errhandler:
+   Application.Visible = True
+   MsgBox "An error occurred due to backward compatibility.Please format the 'hours spent' column to text(hh.mm). " & Chr(13) & "Error description-" & Err.Description, vbCritical, "Oops!!"
+  
+End Sub
+
+
+Sub createDataForGraph(selectedMonth)
+   
+   Dim chartMonth
+   Dim columnCount
+   Dim autoFillRange
+    'Clear the GraphData Sheet
+    Rows("1:50").Select
+    Selection.Delete Shift:=xlUp
+
+
+    chartMonth = selectedMonth
+    columnCount = Sheets(chartMonth).UsedRange.Rows.Count
+    autoFillRange = "C2:C" & columnCount - 2
+    Sheets(chartMonth).Select
+    Cells.Select
+    Selection.Copy
+    Sheets("GraphData").Select
+    Range("A1").Select
+    ActiveSheet.Paste
+    Columns("B:C").Select
+    Application.CutCopyMode = False
+    Selection.Delete Shift:=xlToLeft
+    Rows("1:2").Select
+    Selection.Delete Shift:=xlUp
+    Range("C1").Select
+    ActiveCell.FormulaR1C1 = "Time Spent"
+    Range("C2").Select
+    ActiveCell.FormulaR1C1 = "=ROUND(RC[-1],1)"
+    Selection.AutoFill Destination:=Range(autoFillRange), Type:=xlFillDefault
+End Sub
+
+Sub display_average(sheetname)
+    On Error GoTo errhandler
+ 
+    
+   'New code for average
+    Dim getSheetName, usedRows, tempArray, totalMinsforDay, totalMinsforMonth, averageTime, i, avgCounter
+    getSheetName = sheetname
+    averageTime = 0
+    avgCounter = 0
+    totalMinsforMonth = 0
+    
+    usedRows = Sheets(getSheetName).UsedRange.Rows.Count
+     If usedRows < 4 And Sheets(getSheetName).Cells(4, 4).Value = "" Then
+      MsgBox "Sorry No data exists", vbCritical, "Oops!!"
+      Exit Sub
+     End If
+     For i = 4 To usedRows
+     If Trim(Sheets(getSheetName).Cells(i, 4).Value) <> "" Then
+        tempArray = Split(CStr(Sheets(getSheetName).Cells(i, 4).Value), ".")
+        totalMinsforDay = tempArray(0) * 60 + tempArray(1)
+        totalMinsforMonth = totalMinsforMonth + totalMinsforDay
+        avgCounter = avgCounter + 1
+     End If
+     Next
+     
+    averageTime = Round(totalMinsforMonth / avgCounter, 0)
+    
+    
+     Dim actualAvgHours, actualAvgMins, actualAvgTime
+     actualAvgHours = Int(averageTime / 60)
+     actualAvgMins = averageTime - (actualAvgHours * 60)
+       If Len(actualAvgMins) = 1 Then
+         actualAvgMins = "0" & actualAvgMins
+       End If
+      actualAvgTime = actualAvgHours & "." & actualAvgMins
+     
+    Sheets("Graph").Cells(2, 8).Value = "Your average time(hh.mm) for " & avgCounter & " day(s) is " & actualAvgTime
+    Exit Sub
+
+errhandler:
+    MsgBox "An error occurred due to backward compatibility.Please format the 'hours spent' column to text(hh.mm). " & Chr(13) & "Error description-" & Err.Description, vbCritical, "Oops!!"
+    
+End Sub
+
+
+
+'Module4
+Sub updateTime()
+  'Calculate
+  'Application.OnTime Now + TimeValue("00:00:01"), "updateTime", , True
+End Sub
+
+Sub findTodaySheet()
+   Dim tempdt As String
+   tempdt = FormatDateTime(Now, vbLongDate)
+   
+   sheetToOpen = Trim(Mid(tempdt, InStr(1, tempdt, ",") + 2, 3)) & " " & Trim(Mid(tempdt, Len(tempdt) - 3, 4))
+   Sheets(sheetToOpen).Activate
+   
+End Sub
+
+
+'Sheet- Graph
+Private Sub Worksheet_Activate()
+  Dim myDD As DropDown
+   Set myDD = Me.DropDowns("Drop Down 1")
+   With myDD
+   .RemoveAllItems
+   .AddItem "Please select a month"
+   For i = 4 To Sheets.Count
+    .AddItem Sheets(i).Name
+   Next
+   .ListIndex = 1
+   
+   End With
+   
+   Cells(2, 8).Value = ""
+   ActiveSheet.ChartObjects("Chart 1").Visible = False
+End Sub
+
+'Sheet- Home
+Private Sub Calendar1_Click()
+ MsgBox "You don't have privilages to modify the date", vbCritical, "Oops!"
+ Calendar1.Value = Now
+End Sub
+
+Private Sub Calendar1_LostFocus()
+ Calendar1.Value = Now
+End Sub
+
+
+Private Sub Worksheet_BeforeRightClick(ByVal Target As Range, Cancel As Boolean)
+Calculate
+SendKeys ("{ESCAPE}")
+End Sub
+
+
+'This workbook
+
+Private Sub Workbook_Open()
+   Sheets("Home").Calendar1.Value = Now
+   Dim tempdt As String
+   tempdt = FormatDateTime(Now, vbLongDate)
+   
+   sheetToOpen = Trim(Mid(tempdt, InStr(1, tempdt, ",") + 2, 3)) & " " & Trim(Mid(tempdt, Len(tempdt) - 3, 4))
+   'Sheets(sheetToOpen).Activate
+   
+  
+
+End Sub
+
+Private Sub Workbook_SheetSelectionChange(ByVal Sh As Object, ByVal Target As Range)
+ If Target(1, 1) <> "" And Target(1, 1) <> "HIDDEN" And ActiveSheet.Name <> "GraphData" And ActiveSheet.Name <> "Graph" Then
+   'MsgBox Target(1, 1)
+   Dim userInput
+   userInput = MsgBox("Are you sure u wanna manually edit this value ?", vbYesNo, "Hey Buddy")
+    
+    Select Case userInput
+       Case 6:
+         'MsgBox "You selected yes"
+       Case 7:
+         'MsgBox "You selecetd no"
+         ActiveSheet.Cells(1, 1).Activate
+    End Select
+    
+ End If
+End Sub
